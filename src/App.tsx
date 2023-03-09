@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import logo from "./logo.svg";
+import { useState, useEffect } from "react";
 import "./App.css";
-import { Flipside, Query, QueryResultSet } from "@flipsidecrypto/sdk";
+import { Flipside, Query } from "@flipsidecrypto/sdk";
 
 interface Record {
   reward?: string | number | boolean | null;
@@ -18,7 +17,7 @@ type Cryptoccurency = {
 
 // Initialize `Flipside` with your API key
 const flipside = new Flipside(
-  "af683580-bc05-4cfa-a796-7e0e949cb7ab",
+  process.env.API_KEY!,
   "https://node-api.flipsidecrypto.com"
 );
 
