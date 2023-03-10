@@ -21,11 +21,6 @@ const flipside = new Flipside(
   "https://node-api.flipsidecrypto.com"
 );
 
-// const flipside = new Flipside(
-//   "af683580-bc05-4cfa-a796-7e0e949cb7ab",
-//   "https://node-api.flipsidecrypto.com"
-// );
-
 const getChestQuery = (walletList: Array<string>) => {
   const wallets = `TX_TO = ` + `'` + walletList.join(`' AND TX_TO = '`) + `'`;
   const query: Query = {
