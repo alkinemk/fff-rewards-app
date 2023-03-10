@@ -256,7 +256,7 @@ function App() {
       return { reward, amount };
     });
 
-    const query_2_records = query_2_result.records![0][0];
+    const query_2_records = query_2_result.records![0].amount;
 
     setChestResults(query_1_records);
     setStakingResults(query_2_records);
