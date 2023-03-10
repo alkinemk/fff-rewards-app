@@ -15,11 +15,16 @@ type Cryptoccurency = {
   [key: string]: Price;
 };
 
-// Initialize `Flipside` with your API key
+//Initialize `Flipside` with your API key
 const flipside = new Flipside(
   process.env.API_KEY!,
   "https://node-api.flipsidecrypto.com"
 );
+
+// const flipside = new Flipside(
+//   "af683580-bc05-4cfa-a796-7e0e949cb7ab",
+//   "https://node-api.flipsidecrypto.com"
+// );
 
 const getChestQuery = (walletList: Array<string>) => {
   const wallets = `TX_TO = ` + `'` + walletList.join(`' AND TX_TO = '`) + `'`;
@@ -203,8 +208,9 @@ const getStakingQuery = (walletList: Array<string>) => {
 
 function App() {
   const [chestResults, setChestResults] = useState<Array<Record>>();
-  const [stakingResults, setStakingResults] =
-    useState<Array<string | number | boolean | null>>();
+  const [stakingResults, setStakingResults] = useState<
+    string | number | boolean | null
+  >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [walletList, setWalletList] = useState<Array<string>>([]);
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
@@ -255,10 +261,7 @@ function App() {
       return { reward, amount };
     });
 
-    const query_2_records = query_2_result.records?.map((record) => {
-      const amount = record.amount!;
-      return amount;
-    });
+    const query_2_records = query_2_result.records![0][0];
 
     setChestResults(query_1_records);
     setStakingResults(query_2_records);
@@ -302,18 +305,14 @@ function App() {
                   ))}
                 </tbody>
               </table>
-              {stakingResults?.slice(-1).map((record) => {
-                if (record != null) {
-                  return (
-                    <>
-                      <div>FOXY from staking: {record}</div>
-                      <div>
-                        Today, that's {(Number(record) * foxyPrice).toFixed(2)}$
-                      </div>
-                    </>
-                  );
-                }
-              })}
+
+              <>
+                <div>FOXY from staking: {stakingResults}</div>
+                <div>
+                  Today, that's{" "}
+                  {(Number(stakingResults) * foxyPrice).toFixed(2)}$
+                </div>
+              </>
             </>
           ) : (
             <></>
