@@ -15,6 +15,8 @@ type Cryptoccurency = {
   [key: string]: Price;
 };
 
+console.log(process.env);
+
 //Initialize `Flipside` with your API key
 const flipside = new Flipside(
   process.env.REACT_APP_API_KEY!,
