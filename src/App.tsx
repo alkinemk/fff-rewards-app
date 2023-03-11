@@ -17,7 +17,7 @@ type Cryptoccurency = {
 
 //Initialize `Flipside` with your API key
 const flipside = new Flipside(
-  process.env.API_KEY!,
+  process.env.REACT_APP_API_KEY!,
   "https://node-api.flipsidecrypto.com"
 );
 
