@@ -13,8 +13,12 @@
   font-family: "Lilita_One";
 }
 
-.orange-bg {
+.orange-bg-1 {
   background-color: #FF9034;
+}
+
+.orange-bg-2 {
+  background-color: #f9aa69;
 }
 
 .inner-purple-bg {

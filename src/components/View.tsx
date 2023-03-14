@@ -48,10 +48,10 @@ function View(props: Props) {
           <div className="flex rounded-md inner-purple-bg">
             <div className="pt-6 pb-6 flex items-stretch w-full">
               <div className="pl-8 pb-8 flex flex-col flex-1 rounded-lg w-3/5">
-                <span className="sm:text-3xl lg:text-5xl pb-4 text-2xl font-face-lolita text-slate-400">
+                <span className="sm:text-2xl md:text-3xl lg:text-5xl pb-4 text-2xl font-face-lolita text-slate-400">
                   DETAILED REWARDS
                 </span>
-                <table className="text-l sm:text-2xl self-center w-2/3">
+                <table className="text-l sm:text-xl md:text-2xl self-center w-2/3">
                   <thead className="text-slate-400">
                     <tr>
                       <th className="pl-4 py-3 border-b text-left">Reward</th>
@@ -93,16 +93,19 @@ function View(props: Props) {
             <div className="flex flex-col text-center rounded-md inner-purple-bg gap-5">
               <div className="flex py-4 text-slate-200 font-medium text-xl font-face-lolita">
                 <div className="flex flex-col flex-auto border-r-2">
-                  <span className="sm:text-3xl lg:text-5xl">
+                  <span className="text-base sm:text-2xl md:text-3xl lg:text-5xl">
                     STAKING TO DATE
                   </span>
-                  <span className="orange-text text-4xl pt-4 sm:text-6xl lg:text-8xl">
+                  <span className="orange-text text-3xl sm:text-4xl pt-4 md:text-6xl lg:text-8xl">
                     {stakingResults?.toLocaleString()}
                   </span>
-                  <span className="sm:text-2xl lg:text-4xl"> $FOXY</span>
+                  <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
+                    {" "}
+                    $FOXY
+                  </span>
                 </div>
                 <div className="flex flex-col flex-auto border-l-2">
-                  <span className="sm:text-3xl lg:text-5xl">
+                  <span className="text-base sm:text-2xl md:text-3xl lg:text-5xl">
                     MISSION REWARDS
                   </span>
                   <div className="flex flex-row justify-evenly gap-4">
@@ -114,21 +117,21 @@ function View(props: Props) {
                       .map<React.ReactNode>((record) =>
                         record.reward === "FOXY" ? (
                           <div className="flex flex-col pt-4">
-                            <span className="orange-text text-4xl sm:text-6xl lg:text-8xl">
+                            <span className="orange-text text-3xl sm:text-4xl md:text-6xl lg:text-8xl">
                               {Number(record.amount).toLocaleString()}
                             </span>
 
-                            <span className="sm:text-2xl lg:text-4xl">
+                            <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
                               ${record.reward}
                             </span>
                           </div>
                         ) : (
                           <div className="flex flex-col pt-4">
-                            <span className="solana-text text-4xl sm:text-6xl lg:text-8xl">
+                            <span className="solana-text text-3xl sm:text-4xl md:text-6xl lg:text-8xl">
                               {Number(record.amount).toLocaleString()}
                             </span>
 
-                            <span className="sm:text-2xl lg:text-4xl">
+                            <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
                               ${record.reward}
                             </span>
                           </div>
