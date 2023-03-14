@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Lilita_One";
+  src: local("Lilita_One"),
+   url("./fonts/Lilita_One/LilitaOne-Regular.ttf") format("truetype");
+  font-weight: bold;
+  }
+
+.font-face-lolita {
+  font-family: "Lilita_One";
+}
+
+.orange-bg {
+  background-color: #FF9034;
+}
+
+.inner-purple-bg {
+  background-color: #3C1863;
+}
+
+.green-bg {
+  background-color: #10B981 
+}
+
+.orange-text {
+  color: #FF9034;
+}
+
+.solana-text {
+  color: #00e0be;
+}
+
+.green-text {
+  color: #10B981 
+}
+
+.outer-purple {
+  background-color: #2E004B;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,6 +48,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #2E004B;
 }
 
 code {

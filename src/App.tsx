@@ -6,11 +6,7 @@ import View from "./components/View";
 import WalletInput from "./components/WalletInput";
 
 function App() {
-  return (
-    <div className="h-screen bg-slate-800">
-      <WalletInput></WalletInput>
-    </div>
-  );
+  return <WalletInput></WalletInput>;
 }
 
 export default App;
