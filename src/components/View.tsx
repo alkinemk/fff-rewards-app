@@ -77,7 +77,7 @@ function View(props: Props) {
                             {record?.reward}
                           </td>
                           <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
-                            {record?.amount?.toLocaleString()}
+                            {Number(record?.amount).toLocaleString()}
                           </td>
                         </tr>
                       ))}
@@ -105,7 +105,7 @@ function View(props: Props) {
                   <span className="sm:text-3xl lg:text-5xl">
                     MISSION REWARDS
                   </span>
-                  <div className="flex flex-row justify-center gap-4">
+                  <div className="flex flex-row justify-evenly gap-4">
                     {chestResults
                       ?.filter(
                         (record) =>
@@ -115,9 +115,8 @@ function View(props: Props) {
                         record.reward === "FOXY" ? (
                           <div className="flex flex-col pt-4">
                             <span className="orange-text text-4xl sm:text-6xl lg:text-8xl">
-                              {record.amount?.toLocaleString()}
+                              {Number(record.amount).toLocaleString()}
                             </span>
-                            {/* {Number(record.amount) * Number(prices?[record.reward])} */}
 
                             <span className="sm:text-2xl lg:text-4xl">
                               ${record.reward}
@@ -126,9 +125,8 @@ function View(props: Props) {
                         ) : (
                           <div className="flex flex-col pt-4">
                             <span className="solana-text text-4xl sm:text-6xl lg:text-8xl">
-                              {record.amount?.toLocaleString()}
+                              {Number(record.amount).toLocaleString()}
                             </span>
-                            {/* {Number(record.amount) * Number(prices?[record.reward])} */}
 
                             <span className="sm:text-2xl lg:text-4xl">
                               ${record.reward}
