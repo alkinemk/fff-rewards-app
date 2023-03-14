@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 //import "./App.css";
 import { Flipside, Query } from "@flipsidecrypto/sdk";
 import View from "./View";
 import ToggleButton from "./ToggleButton";
+import "./WalletInput.css";
+import { Node } from "typescript";
 
 interface Record {
   reward: string;
   amount: string;
 }
+
+// interface Wallet {
+//   address_account: string;
+// }
 
 type Price = {
   [key: string]: number;
@@ -24,7 +30,7 @@ const flipside = new Flipside(
 );
 
 const getChestQuery = (walletList: Array<string>) => {
-  const wallets = `TX_TO = ` + `'` + walletList.join(`' AND TX_TO = '`) + `'`;
+  const wallets = `TX_TO = ` + `'` + walletList.join(`' OR TX_TO = '`) + `'`;
   const query: Query = {
     sql: `
     SELECT
@@ -181,7 +187,7 @@ const getChestQuery = (walletList: Array<string>) => {
 };
 
 const getStakingQuery = (walletList: Array<string>) => {
-  const wallets = `TX_TO = ` + `'` + walletList.join(`' AND TX_TO = '`) + `'`;
+  const wallets = `TX_TO = ` + `'` + walletList.join(`' OR TX_TO = '`) + `'`;
   const query: Query = {
     sql: `
       SELECT
@@ -208,7 +214,7 @@ function WalletInput() {
     string | number | boolean | null
   >();
 
-  const [walletList, setWalletList] = useState<Array<string>>([]);
+  const [walletList, setWalletList] = useState<Array<string>>(["test", "text"]);
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
     useState<boolean>(false);
 
@@ -301,8 +307,10 @@ function WalletInput() {
     });
 
     const query_1_records = query_1_result.records!.map((record) => {
+      console.log(record);
       const reward = record.reward?.toString()!;
       const amount = record.amount?.toString()!;
+
       return { reward, amount };
     });
 
@@ -312,58 +320,110 @@ function WalletInput() {
     setStakingResults(query_2_records);
   };
 
+  const handleWalletAdd = () => {
+    setWalletList([...walletList, ""]);
+  };
+
+  const handleWalletRemove = (index: number) => {
+    const newWalletList = [...walletList];
+    newWalletList.splice(index, 1);
+    setWalletList(newWalletList);
+  };
+
+  const handleWalletChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const { value } = e.target;
+    const list = [...walletList];
+    list[index] = value;
+    setWalletList(list);
+  };
+
   return (
     <>
       <div className="flex justify-center pt-8 gap-2">
-        <label>
-          <input
-            className="w-72 sm:w-96 h-10 block px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-    focus:outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600"
-            placeholder="Enter your wallet"
-            id={"firstInput"}
-            type="text"
-            onChange={(ev) => setWalletList([ev.target.value])}
-            //onChange={(ev) => setWalletList([...walletList, ev.target.value])}
-          />
-        </label>
-        {isLoading ? (
-          <button
-            disabled={isLoading}
-            onClick={onWalletClick}
-            type="button"
-            className="h-10 leading-6 inline-flex items-center px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 cursor-not-allowed green-bg"
-          >
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            Processing...
-          </button>
-        ) : (
-          <button
-            onClick={onWalletClick}
-            type="button"
-            className="h-10 px-3 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white green-bg"
-          >
-            Submit
-          </button>
-        )}
+        <div className="flex flex-col">
+          <div className="flex flex-col mb-1">
+            {walletList.map((wallet, index) => (
+              <div className="flex flex-col">
+                <div className="flex flex-row">
+                  <label className="mb-1">
+                    <input
+                      className="w-72 sm:w-96 h-10 block px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+      focus:outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600"
+                      placeholder={`Enter your wallet ${index + 1}`}
+                      id="wallet"
+                      type="text"
+                      value={wallet}
+                      onChange={(e) => handleWalletChange(e, index)}
+                      //onChange={(ev) => setWalletList([...walletList, ev.target.value])}
+                    />
+                  </label>
+
+                  {walletList.length > 1 && (
+                    <button
+                      className="remove h-10 leading-6 ml-1 inline-flex items-center px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg"
+                      onClick={() => handleWalletRemove(index)}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <div>
+                  {walletList.length - 1 === index && (
+                    <button
+                      className="add h-10 leading-6 px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg"
+                      onClick={handleWalletAdd}
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 ">
+            {isLoading ? (
+              <button
+                disabled={isLoading}
+                onClick={onWalletClick}
+                type="button"
+                className="h-10 flex justify-center items-center w-full leading-6  px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 cursor-not-allowed green-bg"
+              >
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Processing...
+              </button>
+            ) : (
+              <button
+                onClick={onWalletClick}
+                type="button"
+                className="h-10 w-full px-3 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white green-bg"
+              >
+                Submit
+              </button>
+            )}
+          </div>
+        </div>
       </div>
       {!isLoading && hasFirstRequestBeenSent && chestResults.length > 0 && (
         <div>

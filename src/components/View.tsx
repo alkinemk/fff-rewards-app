@@ -60,7 +60,6 @@ function View(props: Props) {
                   </thead>
                   <tbody>
                     {chestResults
-                      ?.slice(0, -1)
                       ?.map((record) => {
                         if (record.reward === "FOXY") {
                           return {
@@ -114,9 +113,9 @@ function View(props: Props) {
                         (record) =>
                           record.reward === "FOXY" || record.reward === "SOL"
                       )
-                      .map<React.ReactNode>((record) =>
+                      .map<React.ReactNode>((record, idx) =>
                         record.reward === "FOXY" ? (
-                          <div className="flex flex-col pt-4">
+                          <div key={idx} className="flex flex-col pt-4">
                             <span className="orange-text text-3xl sm:text-4xl md:text-6xl lg:text-8xl">
                               {Number(record.amount).toLocaleString()}
                             </span>
@@ -126,7 +125,7 @@ function View(props: Props) {
                             </span>
                           </div>
                         ) : (
-                          <div className="flex flex-col pt-4">
+                          <div key={idx} className="flex flex-col pt-4">
                             <span className="solana-text text-3xl sm:text-4xl md:text-6xl lg:text-8xl">
                               {Number(record.amount).toLocaleString()}
                             </span>
