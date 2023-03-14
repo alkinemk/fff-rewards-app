@@ -214,7 +214,7 @@ function WalletInput() {
     string | number | boolean | null
   >();
 
-  const [walletList, setWalletList] = useState<Array<string>>(["test", "text"]);
+  const [walletList, setWalletList] = useState<Array<string>>([""]);
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
     useState<boolean>(false);
 
