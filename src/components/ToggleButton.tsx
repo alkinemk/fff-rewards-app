@@ -19,7 +19,7 @@ function ToggleButton(props: Props) {
             id="toggleB"
             className="sr-only"
           ></input>
-          <div className="block w-14 h-8 rounded-full orange-bg"></div>
+          <div className="block w-14 h-8 rounded-full bg-slate-200"></div>
           <div className="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
         </div>
       </label>

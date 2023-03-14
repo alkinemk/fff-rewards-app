@@ -144,6 +144,7 @@ function View(props: Props) {
             <div className="py-4 flex flex-col text-center rounded-md inner-purple-bg font-face-lolita green-text text-4xl sm:text-5xl lg:text-6xl">
               <div className="text-slate-200">Today, that is </div>
               <div className="text-6xl sm:text-7xl lg:text-9xl">
+                $
                 {toLocaleFixed(
                   chestResults
                     ?.filter(
@@ -162,7 +163,6 @@ function View(props: Props) {
                     ) +
                     Number(stakingResults) * prices["famous-fox-federation"]
                 )}
-                $
               </div>
             </div>
           </div>
