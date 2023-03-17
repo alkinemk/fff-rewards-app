@@ -1,10 +1,9 @@
 import { useState, useEffect, ReactNode } from "react";
 //import "./App.css";
-import { Flipside, Query } from "@flipsidecrypto/sdk";
+import { Flipside, Query, QueryResultSet } from "@flipsidecrypto/sdk";
 import View from "./View";
 import ToggleButton from "./ToggleButton";
 import "./WalletInput.css";
-import { Node } from "typescript";
 
 interface Record {
   reward: string;
@@ -14,6 +13,11 @@ interface Record {
 // interface Wallet {
 //   address_account: string;
 // }
+
+type chestsSales = {
+  total_sol: string | number | boolean | null;
+  total_chests: string | number | boolean | null;
+};
 
 type Price = {
   [key: string]: number;
@@ -91,6 +95,9 @@ const getChestQuery = (walletList: Array<string>) => {
       WHEN mint = '5JQutruod74Ltg1pcpt2Y354ed6RLgwbbxYc8P47aYBY' THEN 'Poster Token'
       WHEN mint = 'Gf3JQHzx8qKjshdXhbE4Mh2m2arfE9gVhLeXUk6Xagbz' THEN 'Metal Print Token'
       WHEN mint = '4SSjVmxXvAmxe5SdTohsg1ESqGjtHpMKdn5Hh2SHScxh' THEN 'Slabz Token'
+      -- limited time rewards
+      WHEN mint = '3y4PTvbVgcReTNjEra5J57ZeHBKSJaSDYpaUG2RSbcQh' THEN 'Dummy Reward Token'
+      WHEN mint = 'GXa9aoN7XgmUymHH1cvomj8caTxHE9UU2opWqHY6XDRx' THEN 'Forebear Reward Token'
       -- valuable items
       WHEN mint = '8CALfhBKfwVgcAvcGUzDcbPdnB3tXEwjDCPAnu71NRAh' THEN 'Famous Fox Den'
       WHEN mint = '3mbUWXsS1y2vMS1TZD7yzB7WqLSNF1PxTRJHd8wFZyQj' THEN 'Orange Box'
@@ -172,6 +179,8 @@ const getChestQuery = (walletList: Array<string>) => {
       or mint = 'C4tVPRoHfD5VGeiumYTdNA9NwycPRk9PwPj6QQtZ8VvL'
       or mint = 'BkwMVyTe9vmmDdHWoVt3WVkTSb5BF8jCmLcUotvyHNKT'
       or mint = 'EiHsh555QZoCebkU8bRCBGvMUJ9ymqLibVb73bmBvS4d'
+      or mint = '3y4PTvbVgcReTNjEra5J57ZeHBKSJaSDYpaUG2RSbcQh'
+      or mint = 'GXa9aoN7XgmUymHH1cvomj8caTxHE9UU2opWqHY6XDRx'
     )
     AND (
       ${wallets}
@@ -182,6 +191,7 @@ const getChestQuery = (walletList: Array<string>) => {
     amount DESC
   `,
     ttlMinutes: 10,
+    cached: true,
   };
   return query;
 };
@@ -203,6 +213,61 @@ const getStakingQuery = (walletList: Array<string>) => {
         AND MINT = 'FoXyMu5xwXre7zEoSvzViRk3nGawHUp9kUh97y2NDhcq'
       `,
     ttlMinutes: 10,
+    cached: true,
+  };
+  return query;
+};
+
+const getChestSalesQuery = (walletList: Array<string>) => {
+  const wallets = `TX_TO = ` + `'` + walletList.join(`' OR TX_TO = '`) + `'`;
+  const query: Query = {
+    sql: `
+    WITH chests AS (
+      SELECT 
+        BLOCK_TIMESTAMP,
+      TX_ID,
+      TX_TO AS chest_buyer,
+      AMOUNT AS qty
+      FROM
+        solana.core.fact_transfers
+      WHERE 
+        BLOCK_TIMESTAMP >= TO_TIMESTAMP_NTZ('2022-02-20') 
+        AND (
+          MINT  = 'ChestbxGy3ybsz7TdKCpErfCKUfWTU9V8e4K3afmpKTT'
+           OR MINT = 'rArEY9MfSHK7Gvi1AXoHHsLJhhXAhfYhitYQMiEAdx4'
+        )
+    ), sol AS (
+      SELECT 
+      TX_ID,
+        AMOUNT AS SOL,
+        TX_TO AS chest_seller
+      FROM
+        solana.core.fact_transfers
+      WHERE 
+        BLOCK_TIMESTAMP >= TO_TIMESTAMP_NTZ('2022-02-20') 
+        AND MINT  = 'So11111111111111111111111111111111111111112'
+        AND TX_TO != '2x3yujqB7LCMdCxV7fiZxPZStNy7RTYqWLSvnqtqjHR6'
+        AND (
+          ${wallets}
+        )
+    ), combined AS (
+      SELECT 
+        *
+      FROM 
+        chests t1 JOIN sol t2 USING (TX_ID)
+    )
+    
+    SELECT 
+      SUM(sol) AS total_sol,
+      SUM(qty) AS total_chests
+    FROM 
+      combined
+    WHERE qty > 0   
+    
+    
+      `,
+    ttlMinutes: 10,
+    cached: true,
   };
   return query;
 };
@@ -211,8 +276,9 @@ function WalletInput() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chestResults, setChestResults] = useState<Array<Record>>([]);
   const [stakingResults, setStakingResults] = useState<
-    string | number | boolean | null
-  >();
+    string | number | boolean | null | undefined
+  >(null);
+  const [chestSalesResult, setChestSalesResults] = useState<chestsSales>();
 
   const [walletList, setWalletList] = useState<Array<string>>([""]);
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
@@ -220,6 +286,7 @@ function WalletInput() {
 
   const [prices, setPrices] = useState<Price>({});
   const [view, setView] = useState<boolean>(false);
+  const [tokenMarket, setTokenMarket] = useState<boolean>(true);
 
   //   useEffect(() => {
   //     // fetch data
@@ -271,6 +338,11 @@ function WalletInput() {
     // let finalStakingResults: Array<string | number | boolean | null> = [];
     let query_1 = getChestQuery(walletList);
     let query_2 = getStakingQuery(walletList);
+    let query_3 = getChestSalesQuery(walletList);
+
+    setChestSalesResults(undefined);
+    setChestResults([]);
+    setStakingResults(null);
 
     // let test_query: Query = {
     //   sql: `
@@ -297,25 +369,57 @@ function WalletInput() {
     //     setHasFirstRequestBeenSent(true);
     //   }
     // );
+    let [
+      query_1_result,
+      query_2_result,
+      query_3_result,
+    ]: Array<QueryResultSet> = [];
 
-    const [query_1_result, query_2_result] = await Promise.all([
-      flipside.query.run(query_1),
-      flipside.query.run(query_2),
-    ]).finally(() => {
-      setIsLoading(false);
-      setHasFirstRequestBeenSent(true);
-    });
+    if (tokenMarket) {
+      [query_1_result, query_2_result, query_3_result] = await Promise.all([
+        flipside.query.run(query_1),
+        flipside.query.run(query_2),
+        flipside.query.run(query_3),
+      ]).finally(() => {
+        setIsLoading(false);
+        setHasFirstRequestBeenSent(true);
+      });
+    } else {
+      [query_1_result, query_2_result] = await Promise.all([
+        flipside.query.run(query_1),
+        flipside.query.run(query_2),
+      ]).finally(() => {
+        setIsLoading(false);
+        setHasFirstRequestBeenSent(true);
+      });
+    }
 
     const query_1_records = query_1_result.records!.map((record) => {
-      console.log(record);
       const reward = record.reward?.toString()!;
       const amount = record.amount?.toString()!;
 
       return { reward, amount };
     });
 
-    const query_2_records = query_2_result.records![0].amount;
+    const query_2_records = query_2_result.records
+      ?.map((record) => {
+        const { amount } = record;
+        return amount;
+      })
+      .at(0);
 
+    if (tokenMarket) {
+      const query_3_records = query_3_result.records
+        ?.map((record) => {
+          const { total_chests, total_sol } = record;
+          return { total_sol: total_sol, total_chests: total_chests };
+        })
+        .at(0);
+
+      setChestSalesResults(query_3_records);
+    }
+
+    console.log(query_1_records, query_2_records);
     setChestResults(query_1_records);
     setStakingResults(query_2_records);
   };
@@ -346,7 +450,7 @@ function WalletInput() {
         <div className="flex flex-col">
           <div className="flex flex-col mb-1">
             {walletList.map((wallet, index) => (
-              <div className="flex flex-col">
+              <div key={index} className="flex flex-col">
                 <div className="flex flex-row">
                   <label className="mb-1">
                     <input
@@ -366,7 +470,7 @@ function WalletInput() {
                       className="remove h-10 leading-6 ml-1 inline-flex items-center px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg"
                       onClick={() => handleWalletRemove(index)}
                     >
-                      Remove
+                      Remove wallet
                     </button>
                   )}
                 </div>
@@ -376,14 +480,27 @@ function WalletInput() {
                       className="add h-10 leading-6 px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg"
                       onClick={handleWalletAdd}
                     >
-                      Add
+                      Add wallet
                     </button>
                   )}
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-5 mb-2">
+          <div className="mt-4 h-14 flex rounded-md inner-purple-bg items-center content-center">
+            <div className="text-slate-200 pl-3">
+              {" "}
+              Have you ever sold your chests?{" "}
+            </div>
+            <ToggleButton
+              id={"tokenMarket"}
+              textLeft={"Yes"}
+              textRight={"No"}
+              onClick={setTokenMarket}
+              value={tokenMarket}
+            ></ToggleButton>
+          </div>
+          <div className="mt-5 mb-6">
             {isLoading ? (
               <button
                 disabled={isLoading}
@@ -425,14 +542,22 @@ function WalletInput() {
           </div>
         </div>
       </div>
-      {!isLoading && hasFirstRequestBeenSent && chestResults.length > 0 && (
+      {!isLoading && hasFirstRequestBeenSent && (
         <div>
-          <ToggleButton value={view} onClick={setView}></ToggleButton>
+          <ToggleButton
+            textLeft={"Lite"}
+            textRight={"Detailed"}
+            id={"view"}
+            value={view}
+            onClick={setView}
+          ></ToggleButton>
           <View
+            tokenMarket={tokenMarket}
             view={view}
             chestResults={chestResults}
             prices={prices}
             stakingResults={stakingResults}
+            chestSalesResults={chestSalesResult}
             isLoading={isLoading}
             hasFirstRequestBeenSent={hasFirstRequestBeenSent}
           ></View>

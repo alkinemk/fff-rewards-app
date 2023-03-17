@@ -3,6 +3,11 @@ interface Record {
   amount: string | number | boolean | null;
 }
 
+type chestsSales = {
+  total_sol: string | number | boolean | null;
+  total_chests: string | number | boolean | null;
+};
+
 // const testPrices: Price = {
 //   "famous-fox-federation": 0.005,
 //   solana: 20,
@@ -35,10 +40,15 @@ interface Props {
   stakingResults: string | number | boolean | null | undefined;
   prices: Price;
   view: boolean;
+  chestSalesResults?: chestsSales | undefined;
+  tokenMarket: boolean;
 }
 
 function View(props: Props) {
-  const { chestResults, stakingResults, prices, view } = props;
+  const { chestResults, stakingResults, prices, view, chestSalesResults } =
+    props;
+
+  console.log(chestSalesResults, chestResults, stakingResults);
 
   return (
     <>
@@ -70,16 +80,33 @@ function View(props: Props) {
                         }
                         return record;
                       })
-                      .map((record, idx) => (
-                        <tr key={idx}>
-                          <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
-                            {record?.reward}
-                          </td>
-                          <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
-                            {Number(record?.amount).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      .map((record, idx) => {
+                        if (record.reward === "SOL") {
+                          return (
+                            <tr key={idx}>
+                              <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
+                                {record?.reward}
+                              </td>
+                              <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
+                                {Number(record?.amount).toLocaleString()} +{" "}
+                                {toLocaleFixed(
+                                  Number(chestSalesResults?.total_sol) || 0
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        }
+                        return (
+                          <tr key={idx}>
+                            <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
+                              {record?.reward}
+                            </td>
+                            <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
+                              {Number(record?.amount).toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
@@ -127,7 +154,10 @@ function View(props: Props) {
                         ) : (
                           <div key={idx} className="flex flex-col pt-4">
                             <span className="solana-text text-3xl sm:text-4xl md:text-6xl lg:text-8xl">
-                              {Number(record.amount).toLocaleString()}
+                              {(
+                                Number(record.amount) +
+                                (Number(chestSalesResults?.total_sol) || 0)
+                              ).toLocaleString()}
                             </span>
 
                             <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
@@ -153,11 +183,19 @@ function View(props: Props) {
                       (record) =>
                         record.reward === "FOXY" || record.reward === "SOL"
                     )
-                    .map(
-                      (record) =>
+                    .map((record) => {
+                      if (record.reward === "SOL") {
+                        return (
+                          prices[matchingNames[record.reward]] *
+                          (Number(record.amount) +
+                            (Number(chestSalesResults?.total_sol) || 0))
+                        );
+                      }
+                      return (
                         prices[matchingNames[record.reward]] *
                         Number(record.amount)
-                    )
+                      );
+                    })
                     .reduce(
                       (previousValue, currentValue) =>
                         previousValue + currentValue,
