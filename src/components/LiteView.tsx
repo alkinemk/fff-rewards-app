@@ -109,7 +109,7 @@ function ChestSales(props: Partial<Props>) {
 }
 
 function GrandTotal(props: Props) {
-  const { missionsResults, chestSalesResults, prices } = props;
+  const { missionsResults, chestSalesResults, prices, stakingResults } = props;
   return (
     <div className="px-4">
       <div className="py-4 flex flex-col text-center rounded-md inner-purple-bg font-face-lolita green-text text-4xl sm:text-5xl lg:text-6xl">
@@ -139,7 +139,8 @@ function GrandTotal(props: Props) {
                 .reduce(
                   (previousValue, currentValue) => previousValue + currentValue
                 )
-            )
+            ) +
+              Number(stakingResults) * prices[matchingNames["FOXY"]]
           )}
         </div>
       </div>
