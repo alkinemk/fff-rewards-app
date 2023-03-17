@@ -5,18 +5,14 @@ import View from "./View";
 import ToggleButton from "./ToggleButton";
 import "./WalletInput.css";
 
-interface Record {
-  reward: string;
-  amount: string;
-}
-
-// interface Wallet {
-//   address_account: string;
-// }
-
-type chestsSales = {
+type ChestsSales = {
   total_sol: string | number | boolean | null;
   total_chests: string | number | boolean | null;
+};
+
+type Record = {
+  amount: string | number | boolean | null;
+  reward: string | number | boolean | null;
 };
 
 type Price = {
@@ -33,7 +29,7 @@ const flipside = new Flipside(
   "https://node-api.flipsidecrypto.com"
 );
 
-const getChestQuery = (walletList: Array<string>) => {
+const getMissionsQuery = (walletList: Array<string>) => {
   const wallets = `TX_TO = ` + `'` + walletList.join(`' OR TX_TO = '`) + `'`;
   const query: Query = {
     sql: `
@@ -274,19 +270,24 @@ const getChestSalesQuery = (walletList: Array<string>) => {
 
 function WalletInput() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [chestResults, setChestResults] = useState<Array<Record>>([]);
-  const [stakingResults, setStakingResults] = useState<
-    string | number | boolean | null | undefined
-  >(null);
-  const [chestSalesResult, setChestSalesResults] = useState<chestsSales>();
-
-  const [walletList, setWalletList] = useState<Array<string>>([""]);
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
     useState<boolean>(false);
 
+  const [missionsResults, setMissionsResults] = useState<
+    Array<Record> | undefined
+  >([]);
+  const [stakingResults, setStakingResults] = useState<
+    string | number | boolean | null | undefined
+  >(null);
+  const [chestSalesResult, setChestSalesResults] = useState<
+    ChestsSales | undefined
+  >();
+
+  const [walletList, setWalletList] = useState<Array<string>>([""]);
+
   const [prices, setPrices] = useState<Price>({});
   const [view, setView] = useState<boolean>(false);
-  const [tokenMarket, setTokenMarket] = useState<boolean>(true);
+  const [chestSellerBoolean, setChestSellerBoolean] = useState<boolean>(true);
 
   //   useEffect(() => {
   //     // fetch data
@@ -336,46 +337,17 @@ function WalletInput() {
     setIsLoading(true);
     // let finalChestResults: Array<Record> = [];
     // let finalStakingResults: Array<string | number | boolean | null> = [];
-    let query_1 = getChestQuery(walletList);
+    let query_1 = getMissionsQuery(walletList);
     let query_2 = getStakingQuery(walletList);
     let query_3 = getChestSalesQuery(walletList);
 
-    setChestSalesResults(undefined);
-    setChestResults([]);
-    setStakingResults(null);
-
-    // let test_query: Query = {
-    //   sql: `
-    //       SELECT
-    //         TX_ID
-    //       FROM
-    //         solana.core.fact_transfers
-    //       WHERE
-    //         BLOCK_TIMESTAMP >= CURRENT_DATE - INTERVAL '1 DAY'
-    //         AND BLOCK_TIMESTAMP < CURRENT_DATE
-    //         AND TX_FROM = 'CtLWXktxQ8sWwNLaYuJP39j3PHpMeqm3BfPWgJsY18R3'
-    //       `,
-    //   ttlMinutes: 10,
-    // };
-
-    // const test = await Promise.all([flipside.query.run(test_query)]).then(
-    //   (res) => {
-    //     if (res.some((subRes) => subRes.error)) {
-    //       setIsLoading(false);
-    //       setHasFirstRequestBeenSent(false);
-    //       return;
-    //     }
-    //     setIsLoading(false);
-    //     setHasFirstRequestBeenSent(true);
-    //   }
-    // );
     let [
       query_1_result,
       query_2_result,
       query_3_result,
     ]: Array<QueryResultSet> = [];
 
-    if (tokenMarket) {
+    if (chestSellerBoolean) {
       [query_1_result, query_2_result, query_3_result] = await Promise.all([
         flipside.query.run(query_1),
         flipside.query.run(query_2),
@@ -384,6 +356,15 @@ function WalletInput() {
         setIsLoading(false);
         setHasFirstRequestBeenSent(true);
       });
+
+      const query_3_records = query_3_result.records
+        ?.map((record) => {
+          const { total_chests, total_sol } = record;
+          return { total_sol, total_chests } as ChestsSales;
+        })
+        .at(0);
+
+      setChestSalesResults(query_3_records);
     } else {
       [query_1_result, query_2_result] = await Promise.all([
         flipside.query.run(query_1),
@@ -394,11 +375,11 @@ function WalletInput() {
       });
     }
 
-    const query_1_records = query_1_result.records!.map((record) => {
-      const reward = record.reward?.toString()!;
-      const amount = record.amount?.toString()!;
+    const query_1_records = query_1_result.records?.map((record) => {
+      const reward = record.reward;
+      const amount = record.amount;
 
-      return { reward, amount };
+      return { reward, amount } as Record;
     });
 
     const query_2_records = query_2_result.records
@@ -408,19 +389,7 @@ function WalletInput() {
       })
       .at(0);
 
-    if (tokenMarket) {
-      const query_3_records = query_3_result.records
-        ?.map((record) => {
-          const { total_chests, total_sol } = record;
-          return { total_sol: total_sol, total_chests: total_chests };
-        })
-        .at(0);
-
-      setChestSalesResults(query_3_records);
-    }
-
-    console.log(query_1_records, query_2_records);
-    setChestResults(query_1_records);
+    setMissionsResults(query_1_records);
     setStakingResults(query_2_records);
   };
 
@@ -450,63 +419,60 @@ function WalletInput() {
         <div className="flex flex-col">
           <div className="flex flex-col mb-1">
             {walletList.map((wallet, index) => (
-              <div key={index} className="flex flex-col">
-                <div className="flex flex-row">
-                  <label className="mb-1">
-                    <input
-                      className="w-72 sm:w-96 h-10 block px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+              <div key={index} className="flex flex-row">
+                <label className="mb-1">
+                  <input
+                    className="sm:w-72 w-44 h-10 block px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
       focus:outline-none focus:border-sky-600 focus:ring-1 focus:ring-sky-600"
-                      placeholder={`Enter your wallet ${index + 1}`}
-                      id="wallet"
-                      type="text"
-                      value={wallet}
-                      onChange={(e) => handleWalletChange(e, index)}
-                      //onChange={(ev) => setWalletList([...walletList, ev.target.value])}
-                    />
-                  </label>
+                    placeholder={`Enter your wallet ${index + 1}`}
+                    id="wallet"
+                    type="text"
+                    value={wallet}
+                    onChange={(e) => handleWalletChange(e, index)}
+                  />
+                </label>
+                {index === 0 && (
+                  <button
+                    className="add h-10 ml-1 leading-6 px-2 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 flex-1"
+                    onClick={handleWalletAdd}
+                  >
+                    Add wallet
+                  </button>
+                )}
 
-                  {walletList.length > 1 && (
-                    <button
-                      className="remove h-10 leading-6 ml-1 inline-flex items-center px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg"
-                      onClick={() => handleWalletRemove(index)}
-                    >
-                      Remove wallet
-                    </button>
-                  )}
-                </div>
-                <div>
-                  {walletList.length - 1 === index && (
-                    <button
-                      className="add h-10 leading-6 px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg"
-                      onClick={handleWalletAdd}
-                    >
-                      Add wallet
-                    </button>
-                  )}
-                </div>
+                {walletList.length > 1 && index !== 0 && (
+                  <button
+                    className="remove h-10 leading-6 ml-1 px-2 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 green-bg flex-1"
+                    onClick={() => handleWalletRemove(index)}
+                  >
+                    Remove wallet
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <div className="mt-4 h-14 flex rounded-md inner-purple-bg items-center content-center">
-            <div className="text-slate-200 pl-3">
+          <div className="mt-1 h-11 flex rounded-md inner-purple-bg items-center gap-2 justify-around px-4">
+            <div className="text-slate-200">
               {" "}
               Have you ever sold your chests?{" "}
             </div>
-            <ToggleButton
-              id={"tokenMarket"}
-              textLeft={"Yes"}
-              textRight={"No"}
-              onClick={setTokenMarket}
-              value={tokenMarket}
-            ></ToggleButton>
+            <div className="flex items-center justify-center">
+              <input
+                id="default-checkbox"
+                type="checkbox"
+                checked={chestSellerBoolean}
+                onChange={() => setChestSellerBoolean(!chestSellerBoolean)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              ></input>
+            </div>
           </div>
-          <div className="mt-5 mb-6">
+          <div className="mt-3 mb-6 flex justify-center">
             {isLoading ? (
               <button
                 disabled={isLoading}
                 onClick={onWalletClick}
                 type="button"
-                className="h-10 flex justify-center items-center w-full leading-6  px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 cursor-not-allowed green-bg"
+                className="h-10 flex justify-center items-center leading-6  px-3 py-2 font-semibold text-sm shadow rounded-md text-white transition ease-in-out duration-150 cursor-not-allowed green-bg"
               >
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -534,7 +500,7 @@ function WalletInput() {
               <button
                 onClick={onWalletClick}
                 type="button"
-                className="h-10 w-full px-3 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white green-bg"
+                className="h-10 px-3 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white green-bg"
               >
                 Submit
               </button>
@@ -552,9 +518,9 @@ function WalletInput() {
             onClick={setView}
           ></ToggleButton>
           <View
-            tokenMarket={tokenMarket}
+            tokenMarket={chestSellerBoolean}
             view={view}
-            chestResults={chestResults}
+            missionsResults={missionsResults}
             prices={prices}
             stakingResults={stakingResults}
             chestSalesResults={chestSalesResult}

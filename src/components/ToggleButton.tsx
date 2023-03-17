@@ -12,7 +12,7 @@ function ToggleButton(props: Props) {
   const { value, onClick, textLeft, textRight, id } = props;
   return (
     <div className="flex items-center justify-center w-full">
-      <div className="text-slate-400 font-medium mr-4">{textLeft}</div>
+      <div className="text-slate-400 font-medium mr-2">{textLeft}</div>
 
       <label htmlFor={id} className="flex items-center cursor-pointer">
         <div className="relative">
@@ -26,7 +26,7 @@ function ToggleButton(props: Props) {
           <div className="dot-1 absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
         </div>
       </label>
-      <div className="ml-4 text-slate-400 font-medium">{textRight}</div>
+      <div className="ml-2 text-slate-400 font-medium">{textRight}</div>
     </div>
   );
 }
