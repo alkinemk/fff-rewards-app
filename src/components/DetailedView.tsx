@@ -12,6 +12,7 @@ type Props = {
   missionsResults: Array<Record> | undefined;
   chestSalesResults: ChestsSales | undefined;
   stakingResults: string | number | boolean | null | undefined;
+  chestBuysResults: ChestsSales | undefined;
 };
 
 const toLocaleFixed = (n: number) => {
@@ -22,7 +23,12 @@ const toLocaleFixed = (n: number) => {
 };
 
 function DetailedView(props: Props) {
-  const { missionsResults, chestSalesResults, stakingResults } = props;
+  const {
+    missionsResults,
+    chestSalesResults,
+    stakingResults,
+    chestBuysResults,
+  } = props;
   return (
     <div className="p-4">
       {/* <div className="py-4 self-center">MISSION REWARDS</div> */}

@@ -218,9 +218,71 @@ const getChestSalesQuery = (walletList: Array<string>) => {
   const wallets = `TX_TO = ` + `'` + walletList.join(`' OR TX_TO = '`) + `'`;
   const query: Query = {
     sql: `
+    WITH
+  sol AS (
+    SELECT
+      TX_ID,
+      AMOUNT AS SOL,
+      TX_TO AS chest_seller
+    FROM
+      solana.core.fact_transfers
+    WHERE
+      BLOCK_TIMESTAMP >= TO_TIMESTAMP_NTZ('2022-02-20')
+      AND MINT = 'So11111111111111111111111111111111111111112'
+      AND (
+        ${wallets}
+      )
+      AND TX_TO != '2x3yujqB7LCMdCxV7fiZxPZStNy7RTYqWLSvnqtqjHR6'
+  ),
+  chests AS (
+    SELECT
+      TX_ID,
+      AMOUNT AS qty
+    FROM
+      solana.core.fact_transfers
+    WHERE
+      BLOCK_TIMESTAMP >= TO_TIMESTAMP_NTZ('2022-02-20')
+      AND (
+        MINT = 'ChestbxGy3ybsz7TdKCpErfCKUfWTU9V8e4K3afmpKTT'
+        OR MINT = 'rArEY9MfSHK7Gvi1AXoHHsLJhhXAhfYhitYQMiEAdx4'
+      )
+      AND TX_ID != '2RXVrNReW1rTYpYEYnrSsT4SJy8cRwtTwzC66u5hMKibzgCj51DmpXGnccY59CyiozVXxuYAgXRnB87qAxboyCFo'
+      AND TX_ID IN (
+        SELECT
+          TX_ID
+        FROM
+          SOL
+      )
+  ),
+  combined AS (
+    SELECT
+      sol,
+      chest_seller,
+      qty
+    FROM
+      chests
+      JOIN sol USING (TX_ID)
+  )
+  SELECT
+    SUM(sol) AS total_sol,
+    SUM(qty) AS total_chests
+  FROM
+    combined
+  WHERE
+    qty > 0
+      `,
+    ttlMinutes: 10,
+    cached: true,
+  };
+  return query;
+};
+
+const getChestBuysQuery = (walletList: Array<string>) => {
+  const wallets = `TX_TO = ` + `'` + walletList.join(`' OR TX_TO = '`) + `'`;
+  const query: Query = {
+    sql: `
     WITH chests AS (
       SELECT 
-        BLOCK_TIMESTAMP,
       TX_ID,
       TX_TO AS chest_buyer,
       AMOUNT AS qty
@@ -232,25 +294,25 @@ const getChestSalesQuery = (walletList: Array<string>) => {
           MINT  = 'ChestbxGy3ybsz7TdKCpErfCKUfWTU9V8e4K3afmpKTT'
            OR MINT = 'rArEY9MfSHK7Gvi1AXoHHsLJhhXAhfYhitYQMiEAdx4'
         )
+        AND (
+          ${wallets}
+        )
     ), sol AS (
       SELECT 
       TX_ID,
-        AMOUNT AS SOL,
-        TX_TO AS chest_seller
+        AMOUNT AS SOL
       FROM
         solana.core.fact_transfers
       WHERE 
         BLOCK_TIMESTAMP >= TO_TIMESTAMP_NTZ('2022-02-20') 
         AND MINT  = 'So11111111111111111111111111111111111111112'
         AND TX_TO != '2x3yujqB7LCMdCxV7fiZxPZStNy7RTYqWLSvnqtqjHR6'
-        AND (
-          ${wallets}
-        )
+        AND TX_ID IN (SELECT TX_ID FROM chests)
     ), combined AS (
       SELECT 
         *
       FROM 
-        chests t1 JOIN sol t2 USING (TX_ID)
+        chests JOIN sol USING (tx_id)
     )
     
     SELECT 
@@ -258,10 +320,8 @@ const getChestSalesQuery = (walletList: Array<string>) => {
       SUM(qty) AS total_chests
     FROM 
       combined
-    WHERE qty > 0   
-    
-    
-      `,
+    WHERE qty > 0
+    `,
     ttlMinutes: 10,
     cached: true,
   };
@@ -280,6 +340,10 @@ function WalletInput() {
     string | number | boolean | null | undefined
   >(null);
   const [chestSalesResult, setChestSalesResults] = useState<
+    ChestsSales | undefined
+  >();
+
+  const [chestBuysResults, setChestBuysResults] = useState<
     ChestsSales | undefined
   >();
 
@@ -340,22 +404,26 @@ function WalletInput() {
     let query_1 = getMissionsQuery(walletList);
     let query_2 = getStakingQuery(walletList);
     let query_3 = getChestSalesQuery(walletList);
+    let query_4 = getChestBuysQuery(walletList);
 
     let [
       query_1_result,
       query_2_result,
       query_3_result,
+      query_4_result,
     ]: Array<QueryResultSet> = [];
 
     if (chestSellerBoolean) {
-      [query_1_result, query_2_result, query_3_result] = await Promise.all([
-        flipside.query.run(query_1),
-        flipside.query.run(query_2),
-        flipside.query.run(query_3),
-      ]).finally(() => {
-        setIsLoading(false);
-        setHasFirstRequestBeenSent(true);
-      });
+      [query_1_result, query_2_result, query_3_result, query_4_result] =
+        await Promise.all([
+          flipside.query.run(query_1),
+          flipside.query.run(query_2),
+          flipside.query.run(query_3),
+          flipside.query.run(query_4),
+        ]).finally(() => {
+          setIsLoading(false);
+          setHasFirstRequestBeenSent(true);
+        });
 
       const query_3_records = query_3_result.records
         ?.map((record) => {
@@ -364,7 +432,15 @@ function WalletInput() {
         })
         .at(0);
 
+      const query_4_records = query_4_result.records
+        ?.map((record) => {
+          const { total_chests, total_sol } = record;
+          return { total_sol, total_chests } as ChestsSales;
+        })
+        .at(0);
+
       setChestSalesResults(query_3_records);
+      setChestBuysResults(query_4_records);
     } else {
       [query_1_result, query_2_result] = await Promise.all([
         flipside.query.run(query_1),
@@ -524,6 +600,7 @@ function WalletInput() {
             prices={prices}
             stakingResults={stakingResults}
             chestSalesResults={chestSalesResult}
+            chestBuysResults={chestBuysResults}
             isLoading={isLoading}
             hasFirstRequestBeenSent={hasFirstRequestBeenSent}
           ></View>

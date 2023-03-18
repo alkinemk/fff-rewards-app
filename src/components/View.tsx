@@ -26,6 +26,7 @@ interface Props {
   missionsResults: Array<Record> | undefined;
   stakingResults: string | number | boolean | null | undefined;
   chestSalesResults: ChestsSales | undefined;
+  chestBuysResults: ChestsSales | undefined;
   prices: Price;
   view: boolean;
 
@@ -33,8 +34,14 @@ interface Props {
 }
 
 function View(props: Props) {
-  const { missionsResults, stakingResults, prices, view, chestSalesResults } =
-    props;
+  const {
+    missionsResults,
+    stakingResults,
+    prices,
+    view,
+    chestSalesResults,
+    chestBuysResults,
+  } = props;
 
   return (
     <>
@@ -43,12 +50,14 @@ function View(props: Props) {
           missionsResults={missionsResults}
           chestSalesResults={chestSalesResults}
           stakingResults={stakingResults}
+          chestBuysResults={chestBuysResults}
         />
       ) : (
         <LiteView
           missionsResults={missionsResults}
           chestSalesResults={chestSalesResults}
           stakingResults={stakingResults}
+          chestBuysResults={chestBuysResults}
           prices={prices}
         />
       )}

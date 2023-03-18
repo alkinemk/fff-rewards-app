@@ -11,6 +11,7 @@ type ChestsSales = {
 type Props = {
   missionsResults: Array<Record> | undefined;
   chestSalesResults: ChestsSales | undefined;
+  chestBuysResults: ChestsSales | undefined;
   stakingResults: string | number | boolean | null | undefined;
   prices: Price;
 };
@@ -93,7 +94,7 @@ function Missions(props: Partial<Props>) {
 }
 
 function ChestSales(props: Partial<Props>) {
-  const { chestSalesResults } = props;
+  const { chestSalesResults, chestBuysResults } = props;
   console.log(chestSalesResults);
   return (
     <div className="flex flex-col flex-auto py-3 border-b-2 last:border-b-0 sm:border-r-2 sm:last:border-r-0 sm:">
@@ -101,7 +102,10 @@ function ChestSales(props: Partial<Props>) {
         CHEST SALES
       </span>
       <span className="solana-text text-3xl sm:text-3xl pt-3 md:text-4xl lg:text-7xl">
-        {toLocaleFixed(Number(chestSalesResults?.total_sol))}
+        {toLocaleFixed(
+          Number(chestSalesResults?.total_sol) -
+            Number(chestBuysResults?.total_sol)
+        )}
       </span>
       <span className="text-base sm:text-xl md:text-xl lg:text-3xl"> $SOL</span>
     </div>
@@ -109,7 +113,13 @@ function ChestSales(props: Partial<Props>) {
 }
 
 function GrandTotal(props: Props) {
-  const { missionsResults, chestSalesResults, prices, stakingResults } = props;
+  const {
+    missionsResults,
+    chestSalesResults,
+    prices,
+    stakingResults,
+    chestBuysResults,
+  } = props;
   return (
     <div className="px-4">
       <div className="py-4 flex flex-col text-center rounded-md inner-purple-bg font-face-lolita green-text text-4xl sm:text-5xl lg:text-6xl">
@@ -128,7 +138,8 @@ function GrandTotal(props: Props) {
                     return (
                       prices[matchingNames[record.reward]] *
                       (Number(record.amount) +
-                        (Number(chestSalesResults?.total_sol) || 0))
+                        (Number(chestSalesResults?.total_sol) -
+                          Number(chestBuysResults?.total_sol) || 0))
                     );
                   }
                   return (
@@ -149,21 +160,27 @@ function GrandTotal(props: Props) {
 }
 
 function LiteView(props: Props) {
-  const { missionsResults, chestSalesResults, stakingResults, prices } = props;
+  const {
+    missionsResults,
+    chestSalesResults,
+    stakingResults,
+    prices,
+    chestBuysResults,
+  } = props;
   return (
     <div className="flex flex-col flex-auto">
       <div className="p-4">
         <div className="flex flex-col text-center rounded-md inner-purple-bg gap-5">
-          <div className="flex flex-col sm:flex-row sm:py-6 px-10 text-slate-200 font-medium text-xl font-face-lolita">
+          <div className="flex flex-col sm:flex-row sm:py-6 text-slate-200 font-medium text-xl px-2 font-face-lolita justify-evenly">
             <>
               <Staking stakingResults={stakingResults} />
-              <Missions
-                missionsResults={missionsResults}
-                chestSalesResults={chestSalesResults}
-              />
+              <Missions missionsResults={missionsResults} />
 
               {chestSalesResults !== undefined && (
-                <ChestSales chestSalesResults={chestSalesResults} />
+                <ChestSales
+                  chestSalesResults={chestSalesResults}
+                  chestBuysResults={chestBuysResults}
+                />
               )}
             </>
           </div>
@@ -173,6 +190,7 @@ function LiteView(props: Props) {
         prices={prices}
         missionsResults={missionsResults}
         chestSalesResults={chestSalesResults}
+        chestBuysResults={chestBuysResults}
         stakingResults={stakingResults}
       />
     </div>
