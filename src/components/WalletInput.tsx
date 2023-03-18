@@ -284,7 +284,6 @@ const getChestBuysQuery = (walletList: Array<string>) => {
     WITH chests AS (
       SELECT 
       TX_ID,
-      TX_TO AS chest_buyer,
       AMOUNT AS qty
       FROM
         solana.core.fact_transfers
@@ -299,7 +298,7 @@ const getChestBuysQuery = (walletList: Array<string>) => {
         )
     ), sol AS (
       SELECT 
-      TX_ID,
+        TX_ID,
         AMOUNT AS SOL
       FROM
         solana.core.fact_transfers

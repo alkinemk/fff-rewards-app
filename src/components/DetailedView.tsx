@@ -66,7 +66,8 @@ function DetailedView(props: Props) {
                           <td className="p-2 pl-4 border-b border-slate-600 text-slate-200">
                             {Number(record?.amount).toLocaleString()} +{" "}
                             {toLocaleFixed(
-                              Number(chestSalesResults?.total_sol) || 0
+                              Number(chestSalesResults?.total_sol) -
+                                Number(chestBuysResults?.total_sol) || 0
                             )}
                           </td>
                         </tr>
