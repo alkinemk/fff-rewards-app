@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+/front-end/node_modules
 
 # testing
 /coverage
@@ -25,4 +26,3 @@ yarn-error.log*
 
 # python files
 /venv
-*.py
