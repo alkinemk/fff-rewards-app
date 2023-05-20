@@ -1,4 +1,3 @@
-import DetailedView from "./DetailedView";
 import LiteView from "./LiteView";
 
 // const testPrices: Price = {
@@ -25,7 +24,6 @@ function View(props: Props) {
     missionsResults,
     stakingResults,
     prices,
-    mode,
     chestSalesResults,
     hasFirstRequestBeenSent,
   } = props;
