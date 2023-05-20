@@ -44,7 +44,6 @@ def get_mission_rewards():
     data = cur.fetchall()
     cur.close()
     conn.close()
-    print(data)
     return jsonify(data)
 
 

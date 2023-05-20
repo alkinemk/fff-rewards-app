@@ -25,4 +25,4 @@ yarn-error.log*
 .vercel
 
 # python files
-/venv
+backend/venv
