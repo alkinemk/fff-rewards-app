@@ -27,6 +27,7 @@ const getStakingRewards = (walletList: Array<string>, mode: string) => {
   params.append("mode", mode);
   const response = fetch(`/api/staking_rewards?${params.toString()}`);
   console.log(response);
+  console.log("hello");
   return response;
 };
 
