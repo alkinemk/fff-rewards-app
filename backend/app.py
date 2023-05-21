@@ -6,6 +6,11 @@ app = Flask(__name__)
 CORS(app)
 
 
+@app.route('/')
+def hello_world():
+    return 'Hello, Docker!'
+
+
 @app.route('/api/staking_rewards', methods=['GET'])
 def get_staking_rewards():
     timeframe = request.args.get('mode')

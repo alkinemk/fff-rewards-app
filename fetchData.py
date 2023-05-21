@@ -1,11 +1,8 @@
-import requests
+
 import psycopg2
-import concurrent.futures
 
 from shroomdk import ShroomDK
-import csv
-import json
-import concurrent.futures
+
 
 # Initialize `ShroomDK` with your API Key
 sdk = ShroomDK("512ed849-a736-4f9e-b2f3-9fea3c854c3e")
