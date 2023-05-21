@@ -1,8 +1,8 @@
 {
-    "rewrites": [
+    "routes": [
       {
-        "source": "*",
-        "destination": "api/api-proxy.js"
+        "src": "/api/(.*)",
+        "dest": "/api-proxy.js"
       }
     ]
   }
