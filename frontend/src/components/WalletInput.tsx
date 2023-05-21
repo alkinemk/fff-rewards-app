@@ -17,7 +17,7 @@ const getMissionsRewards = (walletList: Array<string>, mode: string) => {
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = fetch(
-    `http://198.199.79.252:8000//api/mission_rewards?${params.toString()}`
+    `http://198.199.79.252:8000/api/mission_rewards?${params.toString()}`
   );
   return response;
 };
@@ -27,7 +27,7 @@ const getStakingRewards = (walletList: Array<string>, mode: string) => {
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = fetch(
-    `http://198.199.79.252:8000//api/staking_rewards?${params.toString()}`
+    `http://198.199.79.252:8000/api/staking_rewards?${params.toString()}`
   );
   return response;
 };
@@ -37,7 +37,7 @@ const getChestSales = (walletList: Array<string>, mode: string) => {
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = fetch(
-    `http://198.199.79.252:8000//api/chest_sales?${params.toString()}`
+    `http://198.199.79.252:8000/api/chest_sales?${params.toString()}`
   );
   return response;
 };
