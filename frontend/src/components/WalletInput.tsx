@@ -97,6 +97,8 @@ function WalletInput() {
         getChestSales(walletList, value),
       ]);
 
+      fetch(`http://198.199.79.252:8000/api`).then((res) => console.log(res));
+
       const data1 = await res1.json();
       const data2 = await res2.json();
       const data3 = await res3.json();
