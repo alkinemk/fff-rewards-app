@@ -12,14 +12,26 @@ type Cryptoccurency = {
   [key: string]: Price;
 };
 
+type MissionReward = {
+  amount: number;
+  reward: string;
+};
+
+type StakingResult = {
+  amount: string;
+};
+
+type ChestSalesResult = {
+  amount_difference: number;
+};
+
 const getMissionsRewards = async (walletList: Array<string>, mode: string) => {
   const params = new URLSearchParams();
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = await fetch(
-    `http://127.0.0.1:3000/api/mission_rewards?${params.toString()}`
+    `https://fff-rewards-api-eff993519ef7.herokuapp.com/api/mission_rewards?${params.toString()}`
   );
-  //console.log(response);
   return response;
 };
 
@@ -28,9 +40,8 @@ const getStakingRewards = async (walletList: Array<string>, mode: string) => {
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = await fetch(
-    `http://127.0.0.1:3000/api/staking_rewards?${params.toString()}`
+    `https://fff-rewards-api-eff993519ef7.herokuapp.com/api/staking_rewards?${params.toString()}`
   );
-  //console.log(response);
   return response;
 };
 
@@ -39,9 +50,8 @@ const getChestSales = async (walletList: Array<string>, mode: string) => {
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = await fetch(
-    `http://127.0.0.1:3000/api/chest_sales?${params.toString()}`
+    `https://fff-rewards-api-eff993519ef7.herokuapp.com/api/chest_sales?${params.toString()}`
   );
-  //console.log(response);
   return response;
 };
 
@@ -50,14 +60,22 @@ function WalletInput() {
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
     useState<boolean>(false);
 
-  const [missionsResults, setMissionsResults] = useState<
-    Array<Array<number | string>>
-  >([
-    [0, "FOXY"],
-    [0, "SOL"],
+  const [missionsResults, setMissionsResults] = useState<Array<MissionReward>>([
+    { amount: 0, reward: "FOXY" },
+    { amount: 0, reward: "SOL" },
   ]);
-  const [stakingResults, setStakingResults] = useState(0);
-  const [chestSalesResult, setChestSalesResults] = useState(0);
+  const [stakingResults, setStakingResults] = useState<Array<StakingResult>>([
+    {
+      amount: "0",
+    },
+  ]);
+  const [chestSalesResult, setChestSalesResults] = useState<
+    Array<ChestSalesResult>
+  >([
+    {
+      amount_difference: 0,
+    },
+  ]);
 
   const [walletList, setWalletList] = useState<Array<string>>([""]);
 
@@ -108,13 +126,13 @@ function WalletInput() {
         setMissionsResults(data1);
       } else {
         setMissionsResults([
-          [0, "FOXY"],
-          [0, "SOL"],
+          { amount: 0, reward: "FOXY" },
+          { amount: 0, reward: "SOL" },
         ]);
       }
 
-      setStakingResults(data2[0][0]);
-      setChestSalesResults(data3[0][0]);
+      setStakingResults(data2);
+      setChestSalesResults(data3);
       // do something with the data
     } catch (error) {
       console.error(error);

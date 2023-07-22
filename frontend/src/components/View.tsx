@@ -9,12 +9,25 @@ type Price = {
   [key: string]: number;
 };
 
+type MissionReward = {
+  amount: number;
+  reward: string;
+};
+
+type StakingResult = {
+  amount: string;
+};
+
+type ChestSalesResult = {
+  amount_difference: number;
+};
+
 interface Props {
   isLoading: boolean;
   hasFirstRequestBeenSent: boolean;
-  missionsResults: Array<Array<number | string>>;
-  stakingResults: number;
-  chestSalesResults: number;
+  missionsResults: Array<MissionReward>;
+  stakingResults: Array<StakingResult>;
+  chestSalesResults: Array<ChestSalesResult>;
   prices: Price;
   mode: boolean;
 }
