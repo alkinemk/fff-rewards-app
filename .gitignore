@@ -5,10 +5,12 @@
 /.pnp
 .pnp.js
 /front-end/node_modules
-
+/backend/python
 # testing
 /coverage
+/data
 
+*.sql
 # production
 /build
 

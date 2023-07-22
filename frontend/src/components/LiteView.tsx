@@ -30,7 +30,7 @@ function Staking(props: Partial<Props>) {
   return (
     <div className="flex flex-col flex-auto border-b-2 py-3 sm:border-r-2 sm:border-b-0">
       <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
-        STAKING TO DATE
+        STAKING REWARDS
       </span>
       <span className="orange-text text-3xl sm:text-3xl pt-3 md:text-4xl lg:text-7xl">
         {Number(stakingResults).toLocaleString()}

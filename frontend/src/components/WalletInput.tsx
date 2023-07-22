@@ -12,31 +12,36 @@ type Cryptoccurency = {
   [key: string]: Price;
 };
 
-const getMissionsRewards = (walletList: Array<string>, mode: string) => {
+const getMissionsRewards = async (walletList: Array<string>, mode: string) => {
   const params = new URLSearchParams();
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
-  const response = fetch(`/api/mission_rewards?${params.toString()}`);
-  console.log(response);
+  const response = await fetch(
+    `http://127.0.0.1:3000/api/mission_rewards?${params.toString()}`
+  );
+  //console.log(response);
   return response;
 };
 
-const getStakingRewards = (walletList: Array<string>, mode: string) => {
+const getStakingRewards = async (walletList: Array<string>, mode: string) => {
   const params = new URLSearchParams();
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
-  const response = fetch(`/api/staking_rewards?${params.toString()}`);
-  console.log(response);
-  console.log("hello");
+  const response = await fetch(
+    `http://127.0.0.1:3000/api/staking_rewards?${params.toString()}`
+  );
+  //console.log(response);
   return response;
 };
 
-const getChestSales = (walletList: Array<string>, mode: string) => {
+const getChestSales = async (walletList: Array<string>, mode: string) => {
   const params = new URLSearchParams();
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
-  const response = fetch(`/api/chest_sales?${params.toString()}`);
-  console.log(response);
+  const response = await fetch(
+    `http://127.0.0.1:3000/api/chest_sales?${params.toString()}`
+  );
+  //console.log(response);
   return response;
 };
 
