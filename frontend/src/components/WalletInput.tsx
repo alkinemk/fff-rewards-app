@@ -25,12 +25,15 @@ type ChestSalesResult = {
   amount_difference: number;
 };
 
+const HEROKU_APP = process.env.HEROKU_APP;
+
 const getMissionsRewards = async (walletList: Array<string>, mode: string) => {
+  console.log(HEROKU_APP);
   const params = new URLSearchParams();
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = await fetch(
-    `https://fff-rewards-api-eff993519ef7.herokuapp.com/api/mission_rewards?${params.toString()}`
+    `${HEROKU_APP}/api/mission_rewards?${params.toString()}`
   );
   return response;
 };
@@ -39,8 +42,9 @@ const getStakingRewards = async (walletList: Array<string>, mode: string) => {
   const params = new URLSearchParams();
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
+
   const response = await fetch(
-    `https://fff-rewards-api-eff993519ef7.herokuapp.com/api/staking_rewards?${params.toString()}`
+    `${HEROKU_APP}/api/staking_rewards?${params.toString()}`
   );
   return response;
 };
@@ -50,7 +54,7 @@ const getChestSales = async (walletList: Array<string>, mode: string) => {
   walletList.forEach((address) => params.append("walletList", address));
   params.append("mode", mode);
   const response = await fetch(
-    `https://fff-rewards-api-eff993519ef7.herokuapp.com/api/chest_sales?${params.toString()}`
+    `${HEROKU_APP}/api/chest_sales?${params.toString()}`
   );
   return response;
 };
