@@ -9,6 +9,9 @@ const pool = new Pool({
   database: process.env.DATABASE_NAME,
   password: process.env.DATABASE_PASSWORD,
   port: 5432,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 app.use(express.json());
@@ -19,6 +22,7 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/api/staking_rewards", async (req, res) => {
+  console.log("/api/staking_rewards");
   try {
     const timeframe = req.query.mode;
     let my_list = req.query.walletList;
@@ -60,27 +64,36 @@ app.get("/api/chest_sales", async (req, res) => {
     }
     const placeholders = my_list.map((_, index) => `$${index + 1}`).join(", ");
 
+    // const queryText =
+    //   timeframe === "Weekly"
+    //     ? `
+    //     SELECT SUM(seller_amount) - SUM(buyer_amount) AS amount_difference
+    //     FROM (
+    //       SELECT
+    //         CASE WHEN buyer IN (${placeholders}) THEN sol_amount ELSE 0 END AS buyer_amount,
+    //         CASE WHEN seller IN (${placeholders}) THEN sol_amount ELSE 0 END AS seller_amount
+    //       FROM chest_sales_transactions
+    //       WHERE BLOCK_TIMESTAMP >= (CURRENT_DATE - interval '7 days') AND sol_amount > 0 AND BLOCK_TIMESTAMP < CURRENT_DATE AND (buyer IN (${placeholders}) OR seller IN (${placeholders}))
+    //     ) as t
+    //   `
+    //     : `
+    //     SELECT SUM(seller_amount) - SUM(buyer_amount) AS amount_difference
+    //     FROM (
+    //       SELECT
+    //         CASE WHEN buyer IN (${placeholders}) THEN sol_amount ELSE 0 END AS buyer_amount,
+    //         CASE WHEN seller IN (${placeholders}) THEN sol_amount ELSE 0 END AS seller_amount
+    //       FROM chest_sales_transactions
+    //       WHERE sol_amount > 0 AND buyer IN (${placeholders}) OR seller IN (${placeholders})
+    //     ) as t
+    //   `;
+
     const queryText =
       timeframe === "Weekly"
         ? `
-        SELECT SUM(seller_amount) - SUM(buyer_amount) AS amount_difference
-        FROM (
-          SELECT 
-            CASE WHEN buyer IN (${placeholders}) THEN sol_amount ELSE 0 END AS buyer_amount,
-            CASE WHEN seller IN (${placeholders}) THEN sol_amount ELSE 0 END AS seller_amount
-          FROM chest_sales_transactions
-          WHERE BLOCK_TIMESTAMP >= (CURRENT_DATE - interval '7 days') AND BLOCK_TIMESTAMP < CURRENT_DATE AND (buyer IN (${placeholders}) OR seller IN (${placeholders})) 
-        ) as t
+        SELECT SUM(sol_amount) AS amount_difference FROM chest_sales_transactions WHERE seller IN (${placeholders}) AND BLOCK_TIMESTAMP >= (CURRENT_DATE - interval '7 days') AND sol_amount > 0 AND BLOCK_TIMESTAMP < CURRENT_DATE
       `
         : `
-        SELECT SUM(seller_amount) - SUM(buyer_amount) AS amount_difference
-        FROM (
-          SELECT 
-            CASE WHEN buyer IN (${placeholders}) THEN sol_amount ELSE 0 END AS buyer_amount,
-            CASE WHEN seller IN (${placeholders}) THEN sol_amount ELSE 0 END AS seller_amount
-          FROM chest_sales_transactions
-          WHERE buyer IN (${placeholders}) OR seller IN (${placeholders})
-        ) as t
+        SELECT SUM(sol_amount) AS amount_difference FROM chest_sales_transactions WHERE seller IN (${placeholders})
       `;
 
     const result = await pool.query(queryText, my_list);
