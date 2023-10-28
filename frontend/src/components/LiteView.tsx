@@ -46,7 +46,7 @@ function Staking(props: Partial<Props>) {
         STAKING REWARDS
       </span>
       <span className="orange-text text-3xl sm:text-3xl pt-3 md:text-4xl lg:text-7xl">
-        {Number(stakingResults?.[0]?.amount)}
+        {Number(stakingResults?.[0]?.amount.toLocaleString())}
       </span>
       <span className="text-base sm:text-xl md:text-xl lg:text-3xl">
         {" "}
