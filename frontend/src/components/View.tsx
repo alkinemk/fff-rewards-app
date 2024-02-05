@@ -47,6 +47,8 @@ function View(props: Props) {
     hasFirstRequestBeenSent,
   } = props;
 
+  console.log(lendingResults);
+
   return (
     <>
       {hasFirstRequestBeenSent && (
