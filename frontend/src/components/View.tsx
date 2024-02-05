@@ -9,6 +9,10 @@ type Price = {
   [key: string]: number;
 };
 
+type LendingResult = {
+  amount: string;
+};
+
 type MissionReward = {
   amount: number;
   reward: string;
@@ -27,6 +31,7 @@ interface Props {
   hasFirstRequestBeenSent: boolean;
   missionsResults: Array<MissionReward>;
   stakingResults: Array<StakingResult>;
+  lendingResults: Array<LendingResult>;
   chestSalesResults: Array<ChestSalesResult>;
   prices: Price;
   mode: boolean;
@@ -38,6 +43,7 @@ function View(props: Props) {
     stakingResults,
     prices,
     chestSalesResults,
+    lendingResults,
     hasFirstRequestBeenSent,
   } = props;
 
@@ -48,6 +54,7 @@ function View(props: Props) {
           missionsResults={missionsResults}
           chestSalesResults={chestSalesResults}
           stakingResults={stakingResults}
+          lendingResults={lendingResults}
           prices={prices}
         />
       )}

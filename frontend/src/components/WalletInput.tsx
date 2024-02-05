@@ -25,6 +25,10 @@ type ChestSalesResult = {
   amount_difference: number;
 };
 
+type LendingResults = {
+  amount: string;
+};
+
 const REACT_APP_HEROKU_APP = process.env.REACT_APP_HEROKU_APP!;
 
 const getMissionsRewards = async (walletList: Array<string>, mode: string) => {
@@ -58,6 +62,16 @@ const getChestSales = async (walletList: Array<string>, mode: string) => {
   return response;
 };
 
+const getLendingRewards = async (walletList: Array<string>, mode: string) => {
+  const params = new URLSearchParams();
+  walletList.forEach((address) => params.append("walletList", address));
+  params.append("mode", mode);
+  const response = await fetch(
+    `${REACT_APP_HEROKU_APP}/api/lending_rewards?${params.toString()}`
+  );
+  return response;
+};
+
 function WalletInput() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasFirstRequestBeenSent, setHasFirstRequestBeenSent] =
@@ -77,6 +91,12 @@ function WalletInput() {
   >([
     {
       amount_difference: 0,
+    },
+  ]);
+
+  const [lendingResults, setLendingResults] = useState<Array<LendingResults>>([
+    {
+      amount: "0",
     },
   ]);
 
@@ -115,15 +135,17 @@ function WalletInput() {
       } else {
         value = "Weekly";
       }
-      const [res1, res2, res3] = await Promise.all([
+      const [res1, res2, res3, res4] = await Promise.all([
         getMissionsRewards(walletList, value),
         getStakingRewards(walletList, value),
         getChestSales(walletList, value),
+        getLendingRewards(walletList, value),
       ]);
 
       const data1 = await res1.json();
       const data2 = await res2.json();
       const data3 = await res3.json();
+      const data4 = await res4.json();
 
       if (data1.length > 0) {
         setMissionsResults(data1);
@@ -134,6 +156,9 @@ function WalletInput() {
         ]);
       }
 
+      if (data4.length > 0) {
+        setLendingResults(data4);
+      }
       setStakingResults(data2);
       setChestSalesResults(data3);
       // do something with the data
@@ -260,6 +285,7 @@ function WalletInput() {
             prices={prices}
             stakingResults={stakingResults}
             chestSalesResults={chestSalesResult}
+            lendingResults={lendingResults}
             isLoading={isLoading}
             hasFirstRequestBeenSent={hasFirstRequestBeenSent}
           ></View>

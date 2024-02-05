@@ -3,6 +3,10 @@ type MissionReward = {
   reward: string;
 };
 
+type LendingResult = {
+  amount: string;
+};
+
 type StakingResult = {
   amount: string;
 };
@@ -15,6 +19,7 @@ type Props = {
   missionsResults: Array<MissionReward>;
   stakingResults: Array<StakingResult>;
   chestSalesResults: Array<ChestSalesResult>;
+  lendingResults: Array<LendingResult>;
   prices: Price;
 };
 
@@ -57,7 +62,7 @@ function Staking(props: Partial<Props>) {
 }
 
 function Missions(props: Partial<Props>) {
-  const { missionsResults } = props;
+  const { missionsResults, lendingResults } = props;
   return (
     <div className="flex flex-col flex-auto border-b-2 last:border-b-0 py-3 sm:border-r-2 sm:border-b-0">
       <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
@@ -72,7 +77,11 @@ function Missions(props: Partial<Props>) {
               </span>
             ) : (
               <span className="orange-text text-3xl sm:text-3xl pt-3 md:text-4xl lg:text-7xl">
-                {Number(record.amount).toLocaleString()}
+                {lendingResults
+                  ? (
+                      Number(record.amount) + Number(lendingResults[0].amount)
+                    ).toLocaleString()
+                  : Number(record.amount).toLocaleString()}
               </span>
             )}
             <span className="text-base sm:text-xl md:text-xl lg:text-3xl">
@@ -101,7 +110,13 @@ function ChestSales(props: Partial<Props>) {
 }
 
 function GrandTotal(props: Props) {
-  const { missionsResults, chestSalesResults, prices, stakingResults } = props;
+  const {
+    missionsResults,
+    chestSalesResults,
+    lendingResults,
+    prices,
+    stakingResults,
+  } = props;
   if (missionsResults.length > 0)
     return (
       <div className="px-4">
@@ -142,7 +157,13 @@ function GrandTotal(props: Props) {
 }
 
 function LiteView(props: Props) {
-  const { missionsResults, chestSalesResults, stakingResults, prices } = props;
+  const {
+    missionsResults,
+    chestSalesResults,
+    lendingResults,
+    stakingResults,
+    prices,
+  } = props;
   return (
     <div className="flex flex-col flex-auto">
       <div className="p-4">
@@ -163,6 +184,7 @@ function LiteView(props: Props) {
         prices={prices}
         missionsResults={missionsResults}
         chestSalesResults={chestSalesResults}
+        lendingResults={lendingResults}
         stakingResults={stakingResults}
       />
     </div>
