@@ -63,6 +63,7 @@ function Staking(props: Partial<Props>) {
 
 function Missions(props: Partial<Props>) {
   const { missionsResults, lendingResults } = props;
+  console.log(lendingResults?.at(0)?.amount);
   return (
     <div className="flex flex-col flex-auto border-b-2 last:border-b-0 py-3 sm:border-r-2 sm:border-b-0">
       <span className="text-base sm:text-xl md:text-2xl lg:text-4xl">
