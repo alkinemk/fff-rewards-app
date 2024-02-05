@@ -157,6 +157,7 @@ function WalletInput() {
       }
 
       if (data4.length > 0) {
+        console.log(data4);
         setLendingResults(data4);
       }
       setStakingResults(data2);
