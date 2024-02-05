@@ -165,6 +165,7 @@ function LiteView(props: Props) {
     stakingResults,
     prices,
   } = props;
+
   return (
     <div className="flex flex-col flex-auto">
       <div className="p-4">
@@ -172,7 +173,10 @@ function LiteView(props: Props) {
           <div className="flex flex-col sm:flex-row px-14 sm:px-2 sm:py-6 text-slate-200 font-medium text-xl font-face-lolita justify-evenly">
             <>
               <Staking stakingResults={stakingResults} />
-              <Missions missionsResults={missionsResults} />
+              <Missions
+                missionsResults={missionsResults}
+                lendingResults={lendingResults}
+              />
 
               {chestSalesResults !== undefined && (
                 <ChestSales chestSalesResults={chestSalesResults} />
